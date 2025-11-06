@@ -1,6 +1,5 @@
 --!strict
 --[[
-	Quick and dirty SDK for the Luau Execution Sessions API thrown together for demo purposes.
 	Modified from https://github.com/Roblox/project-build-tool-prototype/blob/master/lute/ocale/ocaleSdk.luau
 ]]
 local net = require("@lute/net")
