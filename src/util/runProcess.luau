@@ -1,8 +1,12 @@
 local process = require("@lute/process")
+local system = require("@lute/system")
 
 local log = require("@src/util/log")
 
 return function(cmd)
+	if string.lower(system.os) == "windows_nt" then
+		cmd[1] = cmd[1] .. ".exe"
+	end
 	log.debug(`Running command: {table.concat(cmd, " ")}`)
 
 	local ok, result = pcall(function()

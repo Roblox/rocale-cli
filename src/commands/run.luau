@@ -11,7 +11,7 @@ REQUIRED:
   --apiKey <key>           Roblox API key (or set ROBLOX_API_KEY env var)
 
 LOAD OPTIONS:
-  --load.project <file>    Rojo project file to build and load (requires rojo)
+  --load.project <file>    Rojo project.json/rbxp to build and load (requires rojo or robloxdev-cli)
   --load.place <file>      Load an rbxl
   --load.version <num>     Load existing place version without building/uploading
                            (set to 0 to rerun last uploaded version)
@@ -93,18 +93,33 @@ return function(...)
 		if placeVersion > 0 then
 			placeInfo.placeVersion = placeVersion
 		end
-	end
-
-	if args:get("load.project") then
+	elseif args:get("load.project") then
 		if not fs.exists(args:get("load.project")) then
 			log.fatal(`Project file '{args:get("load.project")}' does not exist`)
 		end
 
-		runProcess({ "rojo", "build", args:get("load.project"), "--output", args:get("output") })
-		ocaleSdk.uploadPlaceFile(args:get("output"), placeInfo, apiKey)
-	end
+		local extension = args:get("load.project"):match("%.([^%.]+)$") or ""
+		if extension == "json" then
+			runProcess({ "rojo", "build", args:get("load.project"), "--output", args:get("output") })
+		elseif extension == "rbxp" then
+			fs.writestringtofile("tmp_empty.luau", "")
+			runProcess({
+				"robloxdev-cli",
+				"run",
+				"--load.place",
+				args:get("load.project"),
+				"--run",
+				"tmp_empty.luau",
+				"--save.place",
+				args:get("output"),
+			})
+			fs.remove("tmp_empty.luau")
+		else
+			log.fatal(`Unsupported project format: .{extension}`)
+		end
 
-	if args:get("load.place") then
+		ocaleSdk.uploadPlaceFile(args:get("output"), placeInfo, apiKey)
+	elseif args:get("load.place") then
 		if not fs.exists(args:get("load.place")) then
 			log.fatal(`Place file '{args:get("load.place")}' does not exist`)
 		end

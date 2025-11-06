@@ -25,7 +25,7 @@ end
 local availableCommands = {
 	run = require("@src/commands/run"),
 	help = help,
-	version = version
+	version = version,
 }
 
 local command = availableCommands[args[2]] or availableCommands["help"]
