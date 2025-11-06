@@ -104,7 +104,7 @@ function OcaleSDK.createTask(
 			script = fs.readfiletostring(scriptPath),
 			binaryInput = binaryInputPath,
 			enableBinaryOutput = enableBinaryOutput,
-			timeout = `{timeout}s`
+			timeout = `{timeout}s`,
 		}),
 	}
 	log.debug(`Request URL: {url}`)
