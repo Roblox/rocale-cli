@@ -136,8 +136,9 @@ return function(...)
 	print(table.concat(logs, "\n"))
 
 	if completedTask.state == "FAILED" then
+		local taskError = completedTask.error :: any
 		log.fatal(
-			`{richterm.red("✗", log.noColor())} Task failed with error: {completedTask.error.code}\n{completedTask.error.message}`
+			`{richterm.red("✗", log.noColor())} Task failed with error: {taskError.code}\n{taskError.message}`
 		)
 	elseif completedTask.state == "CANCELLED" then
 		log.fatal(`{richterm.red("✗", log.noColor())} Task was cancelled`)

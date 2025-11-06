@@ -1,4 +1,3 @@
---!strict
 local net = require("@lute/net")
 local json = require("@std/json")
 local fs = require("@lute/fs")
@@ -186,7 +185,7 @@ function OcaleSDK.getBinaryOutput(binaryOutputUri: string): string
 	return response.body
 end
 
-function OcaleSDK.getTaskLogs(apiKey: string, taskPath: string): string
+function OcaleSDK.getTaskLogs(apiKey: string, taskPath: string): { string }
 	local response = net.request(`https://apis.roblox.com/cloud/v2/{taskPath}/logs`, {
 		method = "GET",
 		headers = { ["x-api-key"] = apiKey },

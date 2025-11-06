@@ -3,7 +3,7 @@ local system = require("@lute/system")
 
 local log = require("../util/log")
 
-return function(cmd)
+return function(cmd: { string })
 	if string.lower(system.os) == "windows_nt" then
 		cmd[1] = cmd[1] .. ".exe"
 	end
