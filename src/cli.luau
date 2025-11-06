@@ -1,7 +1,7 @@
 local args = { ... }
 local VERSION = "0.1.0"
 
-local runCommand = require("@src/commands/run")
+local runCommand = require("./commands/run")
 
 local function helpCommand()
 	print([[

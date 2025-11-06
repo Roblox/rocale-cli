@@ -1,9 +1,9 @@
 local fs = require("@lute/fs")
 
-local log = require("@src/util/log")
+local log = require("../src/util/log")
 log.setLevel("debug")
 
-local runProcess = require("@src/util/runProcess")
+local runProcess = require("../src/util/runProcess")
 
 if not fs.exists("build") then
 	fs.mkdir("build")

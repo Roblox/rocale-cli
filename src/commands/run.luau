@@ -40,10 +40,10 @@ return function(...)
 	local cli = require("@batteries/cli")
 	local args = cli.parser()
 
-	local log = require("@src/util/log")
+	local log = require("../util/log")
 
-	local ocaleSdk = require("@src/core/ocaleSdk")
-	local runProcess = require("@src/util/runProcess")
+	local ocaleSdk = require("../core/ocaleSdk")
+	local runProcess = require("../util/runProcess")
 
 	args:add("script", "option")
 	args:add("load.project", "option")
@@ -94,14 +94,14 @@ return function(...)
 			placeInfo.placeVersion = placeVersion
 		end
 	elseif args:get("load.project") then
-		if not fs.exists(args:get("load.project")) then
+		local projectFile = args:get("load.project")
+		if not fs.exists(projectFile) then
 			log.fatal(`Project file '{args:get("load.project")}' does not exist`)
 		end
 
-		local extension = args:get("load.project"):match("%.([^%.]+)$") or ""
-		if extension == "json" then
-			runProcess({ "rojo", "build", args:get("load.project"), "--output", args:get("output") })
-		elseif extension == "rbxp" then
+		if projectFile:match("%.project%.json$") then
+			runProcess({ "rojo", "build", projectFile, "--output", args:get("output") })
+		elseif projectFile:match("%.rbxp$") then
 			runProcess({
 				"robloxdev-cli",
 				"pack",
@@ -111,7 +111,7 @@ return function(...)
 				args:get("output"),
 			})
 		else
-			log.fatal(`Unsupported project format: .{extension}`)
+			log.fatal(`Unsupported project file: '{projectFile}'. Must be a 'project.json' or '.rbxp' file.`)
 		end
 
 		ocaleSdk.uploadPlaceFile(args:get("output"), placeInfo, apiKey)

@@ -1,7 +1,7 @@
 local process = require("@lute/process")
 local system = require("@lute/system")
 
-local log = require("@src/util/log")
+local log = require("../util/log")
 
 return function(cmd)
 	if string.lower(system.os) == "windows_nt" then
