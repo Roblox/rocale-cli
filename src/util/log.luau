@@ -1,4 +1,3 @@
---!strict
 --[[
 	Simple logger module.
 ]]

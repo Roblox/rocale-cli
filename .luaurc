@@ -1,4 +1,5 @@
 {
+    "languageMode": "strict",
     "aliases": {
         "batteries": "src/batteries",
         "lute": "~/.lute/typedefs/0.1.0/lute", 
