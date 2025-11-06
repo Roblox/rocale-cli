@@ -102,18 +102,14 @@ return function(...)
 		if extension == "json" then
 			runProcess({ "rojo", "build", args:get("load.project"), "--output", args:get("output") })
 		elseif extension == "rbxp" then
-			fs.writestringtofile("tmp_empty.luau", "")
 			runProcess({
 				"robloxdev-cli",
-				"run",
-				"--load.place",
+				"pack",
+				"--input",
 				args:get("load.project"),
-				"--run",
-				"tmp_empty.luau",
-				"--save.place",
+				"--output",
 				args:get("output"),
 			})
-			fs.remove("tmp_empty.luau")
 		else
 			log.fatal(`Unsupported project format: .{extension}`)
 		end
