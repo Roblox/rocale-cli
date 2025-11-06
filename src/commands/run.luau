@@ -1,6 +1,7 @@
 local function help()
 	print([[
 rocale-cli run
+Build, upload, and run a Roblox project in OCALE
 
 USAGE:
   rocale-cli run [options]
