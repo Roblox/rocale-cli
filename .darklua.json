@@ -1,0 +1,7 @@
+{
+  "bundle": {
+    "require_mode": "path",
+    "excludes": ["@lute/**", "@std/**"]
+  },
+  "generator": "retain_lines"
+}
