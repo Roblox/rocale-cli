@@ -73,7 +73,7 @@ return function(...)
 		or args:get("apiKey")
 		or log.fatal("Missing API Key: Set ROBLOX_API_KEY environment variable or provide it as an argument")
 
-	local placeInfo = {
+	local placeInfo: ocaleSdk.PlaceInfo = {
 		universeId = tonumber(args:get("universeId")) or log.fatal("Missing a universe ID"),
 		placeId = tonumber(args:get("placeId")) or log.fatal("Missing a place ID"),
 	}
@@ -127,7 +127,7 @@ return function(...)
 		ocaleSdk.uploadPlaceFile(args:get("load.place"), placeInfo, apiKey)
 	end
 
-	local task = ocaleSdk.createTask(apiKey, placeInfo, args:get("script"))
+	local task = ocaleSdk.createTask(apiKey, placeInfo, args:get("script"), tonumber(args:get("timeout")))
 	local completedTask = ocaleSdk.pollTaskCompletion(
 		apiKey,
 		task.path,
@@ -140,9 +140,9 @@ return function(...)
 
 	if completedTask.state == "FAILED" then
 		log.fatal(
-			`{richterm.red("✗")} Task failed with error: {completedTask.error.code}\n{completedTask.error.message}`
+			`{richterm.red("✗", log.noColor())} Task failed with error: {completedTask.error.code}\n{completedTask.error.message}`
 		)
 	elseif completedTask.state == "CANCELLED" then
-		log.fatal(`{richterm.red("✗")} Task was cancelled`)
+		log.fatal(`{richterm.red("✗", log.noColor())} Task was cancelled`)
 	end
 end

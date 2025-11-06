@@ -9,7 +9,6 @@ local fs = require("@lute/fs")
 local task = require("@lute/task")
 
 local log = require("@src/util/log")
-local noColor = not log.colorsEnabled()
 local richterm = require("@batteries/richterm")
 
 local OcaleSDK = {}
@@ -39,14 +38,14 @@ function OcaleSDK.uploadBinaryFile(uploadUri: string, filePath: string)
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 end
 
-type PlaceInfo = {
+export type PlaceInfo = {
 	universeId: number,
 	placeId: number,
 	placeVersion: number?,
 }
 
 function OcaleSDK.uploadPlaceFile(filePath: string, placeInfo: PlaceInfo, apiKey: string)
-	log.info(`{richterm.blue("→", noColor)} Uploading {filePath} to Roblox...`)
+	log.info(`{richterm.blue("→", log.noColor())} Uploading {filePath} to Roblox...`)
 	local url =
 		`https://apis.roblox.com/universes/v1/{placeInfo.universeId}/places/{placeInfo.placeId}/versions?versionType=Saved`
 	log.debug(`Request URL: {url}`)
@@ -96,11 +95,11 @@ function OcaleSDK.createTask(
 	apiKey: string,
 	placeInfo: PlaceInfo,
 	scriptPath: string,
+	timeout: number?,
 	binaryInputPath: string?,
-	enableBinaryOutput: boolean?,
-	timeout: string?
+	enableBinaryOutput: boolean?
 ): TaskResponse
-	log.info(`{richterm.blue("→", noColor)} Creating the OCALE task...`)
+	log.info(`{richterm.blue("→", log.noColor())} Creating the OCALE task...`)
 	local url = getCreateTaskPath(placeInfo)
 	local req = {
 		method = "POST",
@@ -109,7 +108,7 @@ function OcaleSDK.createTask(
 			script = fs.readfiletostring(scriptPath),
 			binaryInput = binaryInputPath,
 			enableBinaryOutput = enableBinaryOutput,
-			timeout = timeout,
+			timeout = `{timeout}s`
 		}),
 	}
 	log.debug(`Request URL: {url}`)
@@ -132,21 +131,18 @@ function OcaleSDK.pollTaskCompletion(
 
 	local spinnerChars = { "|", "/", "-", "\\" }
 	local spinnerIndex = 1
-	local spinner = richterm.yellow(spinnerChars[spinnerIndex], noColor)
+	local spinner = richterm.yellow(spinnerChars[spinnerIndex], log.noColor())
 
 	local startTime = os.clock()
 	local elapsed = string.format("%.1f", os.clock() - startTime)
-	log.info(`{spinner} Polling for OCALE task completion`, noColor)
+	log.info(`Polling for OCALE task completion`)
 
-	if not noColor then
+	if not log.noColor() then
 		task.spawn(function()
 			while timeRemaining > 0 do
-				local spinner = richterm.bold(richterm.yellow(spinnerChars[spinnerIndex], noColor))
+				spinner = richterm.bold(richterm.yellow(spinnerChars[spinnerIndex], log.noColor()))
 				elapsed = string.format("%.1f", os.clock() - startTime)
-				log.update(
-					`{spinner} {richterm.dim(`[{elapsed}s]`, noColor)} Polling for OCALE task completion`,
-					noColor
-				)
+				log.update(`{spinner} {richterm.dim(`[{elapsed}s]`, log.noColor())} Polling for OCALE task completion`)
 				spinnerIndex = spinnerIndex % #spinnerChars + 1
 				task.wait(0.1)
 			end
@@ -170,7 +166,9 @@ function OcaleSDK.pollTaskCompletion(
 			timeRemaining = 0
 			task.wait(0.1)
 			elapsed = string.format("%.1f", os.clock() - startTime)
-			log.info(`{richterm.green("✓", noColor)} {richterm.dim(`[{elapsed}s]`, noColor)} OCALE task completed`)
+			log.info(
+				`{richterm.green("✓", log.noColor())} {richterm.dim(`[{elapsed}s]`, log.noColor())} OCALE task completed`
+			)
 			return body
 		end
 
@@ -179,7 +177,9 @@ function OcaleSDK.pollTaskCompletion(
 
 	timeRemaining = 0
 	elapsed = string.format("%.1f", os.clock() - startTime)
-	return log.fatal(`{richterm.red("✗", noColor)} {richterm.dim(`[{elapsed}s]`, noColor)} Task timed out`)
+	return log.fatal(
+		`{richterm.red("✗", log.noColor())} {richterm.dim(`[{elapsed}s]`, log.noColor())} Task timed out`
+	)
 end
 
 function OcaleSDK.getBinaryOutput(binaryOutputUri: string): string

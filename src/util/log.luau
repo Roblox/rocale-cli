@@ -158,8 +158,8 @@ function log.disableColors()
 	colorsEnabled = false
 end
 
-function log.colorsEnabled()
-	return colorsEnabled
+function log.noColor()
+	return not colorsEnabled
 end
 
 function log.pretty(tbl: any, indent: number?): string
