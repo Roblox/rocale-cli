@@ -9,9 +9,7 @@ return function(cmd)
 		return process.run(cmd, { stdio = "inherit", env = { PATH = `{process.cwd()}:{process.env.PATH}` } })
 	end)
 
-	if not ok then
-		log.fatal(result)
-	end
+	log.fatalif(not ok, result)
 
 	if result.ok then
 		return result.stdout

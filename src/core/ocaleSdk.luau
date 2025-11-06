@@ -26,9 +26,7 @@ function OcaleSDK.createBinaryInput(apiKey: string, universeId: number, filePath
 			body = json.serialize({ size = fileSize }),
 		}
 	)
-	if not response.ok then
-		log.fatal(`{response.status} - {response.body}`)
-	end
+	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 	return json.deserialize(response.body) :: BinaryInputResponse
 end
 
@@ -38,9 +36,7 @@ function OcaleSDK.uploadBinaryFile(uploadUri: string, filePath: string)
 		headers = { ["content-type"] = "application/octet-stream" },
 		body = fs.readfiletostring(filePath),
 	})
-	if not response.ok then
-		log.fatal(`{response.status} - {response.body}`)
-	end
+	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 end
 
 type PlaceInfo = {
@@ -63,9 +59,7 @@ function OcaleSDK.uploadPlaceFile(filePath: string, placeInfo: PlaceInfo, apiKey
 		},
 		body = fs.readfiletostring(filePath),
 	})
-	if not response.ok then
-		log.fatal(`{response.status} - {response.body}`)
-	end
+	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 	log.debug(`Response body: {log.pretty(response.body)}`)
 end
 
@@ -120,9 +114,7 @@ function OcaleSDK.createTask(
 	}
 	log.debug(`Request URL: {url}`)
 	local response = net.request(url, req)
-	if not response.ok then
-		log.fatal(`{response.status} - {response.body}`)
-	end
+	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 	local taskResponse = json.deserialize(response.body) :: TaskResponse
 	log.debug(`Task path: {taskResponse.path}`)
 
@@ -194,9 +186,7 @@ function OcaleSDK.getBinaryOutput(binaryOutputUri: string): string
 	local response = net.request(binaryOutputUri, {
 		method = "GET",
 	})
-	if not response.ok then
-		log.fatal(`{response.status} - {response.body}`)
-	end
+	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 	return response.body
 end
 
@@ -205,15 +195,11 @@ function OcaleSDK.getTaskLogs(apiKey: string, taskPath: string): string
 		method = "GET",
 		headers = { ["x-api-key"] = apiKey },
 	})
-	if not response.ok then
-		log.fatal(`{response.status} - {response.body}`)
-	end
+	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 
 	local body = json.deserialize(response.body) :: any
 	local logs = body.luauExecutionSessionTaskLogs[1].messages
-	if not logs then
-		log.fatal("Error downloading task logs")
-	end
+	log.fatalif(not logs, "Error downloading task logs")
 
 	return logs
 end
