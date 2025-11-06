@@ -1,7 +1,4 @@
 --!strict
---[[
-	Modified from https://github.com/Roblox/project-build-tool-prototype/blob/master/lute/ocale/ocaleSdk.luau
-]]
 local net = require("@lute/net")
 local json = require("@std/json")
 local fs = require("@lute/fs")
