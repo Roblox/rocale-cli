@@ -1,7 +1,9 @@
 local args = { ... }
 local VERSION = "0.1.0"
 
-local function help()
+local runCommand = require("@src/commands/run")
+
+local function helpCommand()
 	print([[
 rocale-cli
 A command-line tool for building, uploading, and running Roblox projects in OCALE
@@ -18,14 +20,14 @@ For more information about a command, run: rocale-cli <command> --help
 ]])
 end
 
-local function version()
+local function versionCommand()
 	print(VERSION)
 end
 
 local availableCommands = {
-	run = require("@src/commands/run"),
-	help = help,
-	version = version,
+	run = runCommand,
+	help = helpCommand,
+	version = versionCommand,
 }
 
 local command = availableCommands[args[2]] or availableCommands["help"]
