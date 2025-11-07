@@ -31,7 +31,7 @@ jobs:
         run: |
           lute scripts/build
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v5
         with:
           name: rocale-cli-macos-x86_64
           path: build/rocale-cli
@@ -60,7 +60,7 @@ jobs:
         run: |
           lute scripts/build
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v5
         with:
-          name: rocale-cli-win64
+          name: rocale-cli-win64.exe
           path: build/rocale-cli.exe
