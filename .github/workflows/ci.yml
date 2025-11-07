@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    timeout-minutes: 1
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        include:
+          - os: Linux
+            runner: ubuntu-latest
+            setup-foreman: true
+          - os: Windows
+            runner: windows-latest
+            setup-foreman: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up external foreman
+        if: matrix.setup-foreman
+        run: |
+          cp foreman-extern.toml foreman.toml
+
+      - name: Generate access token
+        uses: Roblox-ActionsCache/tibdex-github-app-token@v1.4.0
+        id: setup_token
+        with:
+          app_id: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_ID }}
+          private_key: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_KEY }}
+
+      - name: Get foreman and run foreman install
+        uses: Roblox/setup-foreman@v3
+        with:
+          version: "^1.0.0"
+          token: ${{ steps.setup_token.outputs.token }}
+          allow-external-github-orgs: true
+
+      - name: Run tests
+        env:
+          LOG_NO_COLOR: 1
+          ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+          TEST_UNIVERSE_ID: ${{ secrets.TEST_UNIVERSE_ID }}
+          TEST_PLACE_ID: ${{ secrets.TEST_PLACE_ID }}
+        run: |
+          lute scripts/test
