@@ -12,15 +12,14 @@ jobs:
     timeout-minutes: 1
     runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: true
       max-parallel: 1
       matrix:
         include:
           - os: Linux
             runner: ubuntu-latest
-            setup-foreman: true
           - os: Windows
             runner: windows-latest
-            setup-foreman: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
