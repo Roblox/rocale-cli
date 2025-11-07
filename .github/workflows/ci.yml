@@ -9,8 +9,8 @@ on:
 jobs:
   test:
     name: Test (${{ matrix.os }})
-    timeout-minutes: 1
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 1
     strategy:
       fail-fast: true
       max-parallel: 1
