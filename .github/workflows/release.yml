@@ -12,8 +12,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 3
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Generate access token
         uses: Roblox-ActionsCache/tibdex-github-app-token@v1.4.0
@@ -40,8 +39,7 @@ jobs:
           path: build/rocale-cli
 
   windows:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Generate access token
         uses: Roblox-ActionsCache/tibdex-github-app-token@v1.4.0
