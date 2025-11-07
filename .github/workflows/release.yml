@@ -1,9 +1,5 @@
 name: Release
 
-# on:
-#   push:
-#     tags:
-#       - ["*"]
 on:
   pull_request:
   push:
