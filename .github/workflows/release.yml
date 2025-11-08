@@ -91,5 +91,23 @@ jobs:
 
       - uses: actions/upload-artifact@v5
         with:
-          name: rocale-cli-windows-x86_64.exe
+          name: rocale-cli-windows-x86_64
           path: build/rocale-cli.exe
+
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs:
+      - macos
+      - linux
+      - windows
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Zip release artifacts
+        run: |
+          zip -rj rocale-cli-macos-x86_64.zip ./artifacts/rocale-cli-macos-x86_64/*
+          zip -rj rocale-cli-linux-x86_64.zip ./artifacts/rocale-cli-linux-x86_64/*
+          zip -rj rocale-cli-windows-x86_64.zip ./artifacts/rocale-cli-windows-x86_64/*
