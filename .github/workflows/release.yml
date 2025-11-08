@@ -7,9 +7,22 @@ on:
       - master
 
 jobs:
-  macos:
-    runs-on: macos-latest
-    timeout-minutes: 3
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 1
+    strategy:
+      matrix:
+        include:
+          - os: macos
+            runner: macos-latest
+            artifact_path: "build/rocale-cli"
+          - os: linux
+            runner: ubuntu-latest
+            artifact_path: "build/rocale-cli"
+          - os: windows
+            runner: windows-latest
+            artifact_path: "build/rocale-cli.exe"
     steps:
       - uses: actions/checkout@v4
 
@@ -33,76 +46,15 @@ jobs:
 
       - uses: actions/upload-artifact@v5
         with:
-          name: rocale-cli-macos-x86_64
-          path: build/rocale-cli
-
-  linux:
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Generate access token
-        uses: Roblox-ActionsCache/tibdex-github-app-token@v1.4.0
-        id: setup_token
-        with:
-          app_id: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_ID }}
-          private_key: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_KEY }}
-
-      - name: Get foreman and run foreman install
-        uses: Roblox/setup-foreman@v3
-        with:
-          version: "^1.0.0"
-          token: ${{ steps.setup_token.outputs.token }}
-          allow-external-github-orgs: true
-
-      - name: Build release artifacts
-        run: |
-          lute scripts/build
-
-      - uses: actions/upload-artifact@v5
-        with:
-          name: rocale-cli-linux-x86_64
-          path: build/rocale-cli
-
-  windows:
-    runs-on: windows-latest
-    timeout-minutes: 3
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Generate access token
-        uses: Roblox-ActionsCache/tibdex-github-app-token@v1.4.0
-        id: setup_token
-        with:
-          app_id: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_ID }}
-          private_key: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_KEY }}
-
-      - name: Get foreman and run foreman install
-        uses: Roblox/setup-foreman@v3
-        with:
-          version: "^1.0.0"
-          token: ${{ steps.setup_token.outputs.token }}
-          allow-external-github-orgs: true
-
-      - name: Build release artifacts
-        run: |
-          lute scripts/build
-
-      - uses: actions/upload-artifact@v5
-        with:
-          name: rocale-cli-windows-x86_64
-          path: build/rocale-cli.exe
+          name: rocale-cli-${{ matrix.platform }}-x86_64
+          path: ${{ matrix.artifact_path }}
 
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    needs:
-      - macos
-      - linux
-      - windows
+    needs: build
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: artifacts
       
