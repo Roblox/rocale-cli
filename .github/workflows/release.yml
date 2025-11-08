@@ -46,7 +46,7 @@ jobs:
 
       - uses: actions/upload-artifact@v5
         with:
-          name: rocale-cli-${{ matrix.platform }}-x86_64
+          name: rocale-cli-${{ matrix.os }}-x86_64
           path: ${{ matrix.artifact_path }}
 
   release:

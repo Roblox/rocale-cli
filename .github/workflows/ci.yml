@@ -15,9 +15,9 @@ jobs:
       max-parallel: 1
       matrix:
         include:
-          - os: Linux
+          - os: linux
             runner: ubuntu-latest
-          - os: Windows
+          - os: windows
             runner: windows-latest
     steps:
       - uses: actions/checkout@v4
