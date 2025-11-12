@@ -1,6 +1,5 @@
 [tools]
-lute = { source = "luau-lang/lute", version = "=0.1.0-nightly.20251106" }
-selene = { source = "Roblox/Kampfkarren-selene", version = "0.29.0" }
+lute = { source = "luau-lang/lute", version = "=0.1.0-nightly.20251112" }
 stylua = { source = "Roblox/JohnnyMorganz-StyLua", version = "2.0.1" }
 darklua = { github = "seaofvoices/darklua", version = "=0.17.1" }
 rojo = { source = "Roblox/rojo-rbx-rojo", version = "7.3.0" }
