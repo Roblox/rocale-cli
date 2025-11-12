@@ -1,0 +1,11 @@
+{
+    "name": "TestProject",
+    "tree": {
+        "$className": "DataModel",
+        "ReplicatedStorage": {
+            "TestProject": {
+                "$path": "project"
+            }
+        }
+    }
+}

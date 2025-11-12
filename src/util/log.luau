@@ -10,7 +10,12 @@ local log = {}
 type Level = "trace" | "debug" | "info" | "warn" | "error"
 
 local currentLevel: Level = "info"
+
 local colorsEnabled = true -- set to false to disable colors
+if process.env.LOG_NO_COLOR then
+	colorsEnabled = false
+end
+
 local showCaller = true -- set to false to disable caller information
 
 local levels = {

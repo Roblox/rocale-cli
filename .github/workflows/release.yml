@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  build:
+    name: Build - ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 1
+    strategy:
+      matrix:
+        include:
+          - os: macos
+            runner: macos-latest
+            artifact_path: "build/rocale-cli"
+          - os: linux
+            runner: ubuntu-latest
+            artifact_path: "build/rocale-cli"
+          - os: windows
+            runner: windows-latest
+            artifact_path: "build/rocale-cli.exe"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate access token
+        uses: Roblox-ActionsCache/tibdex-github-app-token@v1.4.0
+        id: setup_token
+        with:
+          app_id: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_ID }}
+          private_key: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_KEY }}
+
+      - name: Get foreman and run foreman install
+        uses: Roblox/setup-foreman@v3
+        with:
+          version: "^1.0.0"
+          token: ${{ steps.setup_token.outputs.token }}
+          allow-external-github-orgs: true
+
+      - name: Build release artifacts
+        run: |
+          lute scripts/build
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: rocale-cli-${{ matrix.os }}-x86_64
+          path: ${{ matrix.artifact_path }}
+
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+      
+      - name: Zip release artifacts
+        run: |
+          zip -rj rocale-cli-macos-x86_64.zip ./artifacts/rocale-cli-macos-x86_64/*
+          zip -rj rocale-cli-linux-x86_64.zip ./artifacts/rocale-cli-linux-x86_64/*
+          zip -rj rocale-cli-windows-x86_64.zip ./artifacts/rocale-cli-windows-x86_64/*
+
+      - uses: Roblox-ActionsCache/softprops-action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          files: |
+            rocale-cli-*.zip
