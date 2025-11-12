@@ -2,3 +2,4 @@
 build
 .env
 output.rbxl
+src/version.luau

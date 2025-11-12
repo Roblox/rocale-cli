@@ -40,7 +40,7 @@ jobs:
 
       - name: Build release artifacts
         run: |
-          lute scripts/build
+          lute scripts/build ${{ github.ref_name }} ${{ github.sha }}
 
       - uses: actions/upload-artifact@v5
         with:

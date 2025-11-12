@@ -1,7 +1,7 @@
 local args = { ... }
-local VERSION = "0.1.0"
 
 local runCommand = require("./commands/run")
+local versionInfo = require("./version")
 
 local function helpCommand()
 	print([[
@@ -21,7 +21,8 @@ For more information about a command, run: rocale-cli <command> --help
 end
 
 local function versionCommand()
-	print(VERSION)
+	print(versionInfo.version)
+	print(versionInfo.hash)
 end
 
 local availableCommands = {
