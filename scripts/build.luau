@@ -27,5 +27,5 @@ fs.write(versionFile, `return \{ version="{version}", hash="{hash}" \}`)
 fs.close(versionFile)
 
 log.info("Building rocale-cli...")
-runProcess({ "lute", "compile", "src/cli.luau", "--output", output_path, "--show-require-graph" })
+runProcess({ "lute", "compile", "src/cli.luau", "--output", output_path, "--show-require-graph", "--bundle-stats" })
 log.info("Build complete: " .. output_path)
