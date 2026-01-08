@@ -8,9 +8,16 @@ local richterm = require("@batteries/richterm")
 
 local OcaleSDK = {}
 
+local function readFileToString(filePath: string): string
+	local fileHandle = fs.open(filePath, "r")
+	local contents = fs.read(fileHandle)
+	fs.close(fileHandle)
+	return contents
+end
+
 export type BinaryInputResponse = { path: string, size: number, uploadUri: string }
 function OcaleSDK.createBinaryInput(apiKey: string, universeId: number, filePath: string): BinaryInputResponse
-	local fileSize = #fs.readfiletostring(filePath)
+	local fileSize = #readFileToString(filePath)
 
 	local response = net.request(
 		`https://apis.roblox.com/cloud/v2/universes/{universeId}/luau-execution-session-task-binary-inputs`,
@@ -28,7 +35,7 @@ function OcaleSDK.uploadBinaryFile(uploadUri: string, filePath: string)
 	local response = net.request(uploadUri, {
 		method = "PUT",
 		headers = { ["content-type"] = "application/octet-stream" },
-		body = fs.readfiletostring(filePath),
+		body = readFileToString(filePath),
 	})
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 end
@@ -51,7 +58,7 @@ function OcaleSDK.uploadPlaceFile(filePath: string, placeInfo: PlaceInfo, apiKey
 			["content-type"] = "application/xml",
 			["Accept"] = "application/json",
 		},
-		body = fs.readfiletostring(filePath),
+		body = readFileToString(filePath),
 	})
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 	log.debug(`Response body: {log.pretty(response.body)}`)
@@ -100,7 +107,7 @@ function OcaleSDK.createTask(
 		method = "POST",
 		headers = { ["x-api-key"] = apiKey, ["content-type"] = "application/json" },
 		body = json.serialize({
-			script = fs.readfiletostring(scriptPath),
+			script = readFileToString(scriptPath),
 			binaryInput = binaryInputPath,
 			enableBinaryOutput = enableBinaryOutput,
 			timeout = `{timeout}s`,
