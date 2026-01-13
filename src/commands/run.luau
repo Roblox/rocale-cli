@@ -91,40 +91,54 @@ return function(...)
 
 	if args:get("load.version") then
 		local placeVersion = tonumber(args:get("load.version"))
+		assert(placeVersion, "Missing place version number")
+
 		if placeVersion > 0 then
 			placeInfo.placeVersion = placeVersion
 		end
 	elseif args:get("load.project") then
 		local projectFile = args:get("load.project")
-		if not fs.exists(projectFile) then
-			log.fatal(`Project file '{args:get("load.project")}' does not exist`)
+		local outputPath = args:get("output")
+
+		if not projectFile or not fs.exists(projectFile) then
+			log.fatal(`Project file '{projectFile}' does not exist`)
 		end
+		assert(projectFile, "Missing project file path")
+		assert(outputPath, "Missing output file path")
 
 		if projectFile:match("%.project%.json$") then
-			runProcess({ "rojo", "build", projectFile, "--output", args:get("output") })
+			runProcess({ "rojo", "build", projectFile, "--output", outputPath })
 		elseif projectFile:match("%.rbxp$") then
 			runProcess({
 				"robloxdev-cli",
 				"pack",
 				"--input",
-				args:get("load.project"),
+				projectFile,
 				"--output",
-				args:get("output"),
+				outputPath,
 			})
 		else
 			log.fatal(`Unsupported project file: '{projectFile}'. Must be a 'project.json' or '.rbxp' file.`)
 		end
 
-		ocaleSdk.uploadPlaceFile(args:get("output"), placeInfo, apiKey)
+		ocaleSdk.uploadPlaceFile(outputPath, placeInfo, apiKey)
 	elseif args:get("load.place") then
-		if not fs.exists(args:get("load.place")) then
-			log.fatal(`Place file '{args:get("load.place")}' does not exist`)
+		local placeFile = args:get("load.place")
+		if not placeFile or not fs.exists(placeFile) then
+			log.fatal(`Place file '{placeFile}' does not exist`)
 		end
+		assert(placeFile, "Missing place file path")
 
-		ocaleSdk.uploadPlaceFile(args:get("load.place"), placeInfo, apiKey)
+		ocaleSdk.uploadPlaceFile(placeFile, placeInfo, apiKey)
 	end
 
-	local task = ocaleSdk.createTask(apiKey, placeInfo, args:get("script"), tonumber(args:get("timeout")))
+	local entryScript = args:get("script")
+	if not entryScript or not fs.exists(entryScript) then
+		log.fatal(`'{entryScript}' is not a valid entry script`)
+	end
+	assert(entryScript)
+	
+	local task = ocaleSdk.createTask(apiKey, placeInfo, entryScript, tonumber(args:get("timeout")))
 	local completedTask = ocaleSdk.pollTaskCompletion(
 		apiKey,
 		task.path,
@@ -137,7 +151,9 @@ return function(...)
 
 	if completedTask.state == "FAILED" then
 		local taskError = completedTask.error :: any
-		log.fatal(`{richterm.red("✗", log.noColor())} Task failed with error: {taskError.code}\n{taskError.message}`)
+		log.fatal(
+			`{richterm.red("✗", log.noColor())} Task failed with error: {taskError.code}\n{taskError.message}`
+		)
 	elseif completedTask.state == "CANCELLED" then
 		log.fatal(`{richterm.red("✗", log.noColor())} Task was cancelled`)
 	end

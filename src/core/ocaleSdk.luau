@@ -103,7 +103,7 @@ function OcaleSDK.createTask(
 ): TaskResponse
 	log.info(`{richterm.blue("→", log.noColor())} Creating the OCALE task...`)
 	local url = getCreateTaskPath(placeInfo)
-	local req = {
+	local req: net.Metadata = {
 		method = "POST",
 		headers = { ["x-api-key"] = apiKey, ["content-type"] = "application/json" },
 		body = json.serialize({

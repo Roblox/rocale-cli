@@ -1,5 +1,5 @@
 --[[
-	source: https://github.com/luau-lang/lute/blob/8696479e2ef59e53454d98aaebeabc61ebd902b5/batteries/cli.luau
+	source: https://github.com/luau-lang/lute/blob/dc6b1780b674586e6b9ebfc64b0250b5aab3d398/batteries/cli.luau
 	MIT License
 
 	Copyright (c) 2024–2025 Roblox Corporation
@@ -65,8 +65,8 @@ function cli.parser(): Parser
 	return setmetatable(self, cli)
 end
 
-function cli.add(self: Parser, name: string, kind: ArgKind, options: ArgOptions): ()
-	local argument = {
+function cli.add(self: Parser, name: string, kind: ArgKind, options: ArgOptions?): ()
+	local argument: ArgData = {
 		name = name,
 		kind = kind,
 		options = options or { aliases = {}, required = false },
@@ -166,17 +166,17 @@ function cli.parse(self: Parser, args: { string }): ()
 	for _, argument in self.arguments do
 		assert(argument)
 
-		if argument.options.required and self.parsed.values[argument.name] == nil then
+		if argument.options.required and not self.parsed.values[argument.name] then
 			assert(self.parsed.values[argument.name], "Missing required argument: " .. argument.name)
 		end
 
-		if self.parsed.values[argument.name] == nil and argument.options.default then
+		if not self.parsed.values[argument.name] and argument.options.default then
 			self.parsed.values[argument.name] = argument.options.default
 		end
 	end
 end
 
-function cli.get(self: Parser, name: string): string
+function cli.get(self: Parser, name: string): string?
 	return self.parsed.values[name]
 end
 
