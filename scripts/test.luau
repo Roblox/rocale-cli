@@ -6,11 +6,6 @@ log.setLevel("debug")
 local runProcess = require("../src/util/runProcess")
 
 runProcess({
-	"lute",
-	"scripts/build",
-})
-
-runProcess({
 	"build/rocale-cli",
 	"run",
 	"--script",
