@@ -40,5 +40,6 @@ jobs:
           TEST_UNIVERSE_ID: ${{ secrets.TEST_UNIVERSE_ID }}
           TEST_PLACE_ID: ${{ secrets.TEST_PLACE_ID }}
         run: |
+          lute setup
           lute check src/cli.luau
           lute scripts/test
