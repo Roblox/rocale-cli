@@ -137,7 +137,7 @@ return function(...)
 		log.fatal(`'{entryScript}' is not a valid entry script`)
 	end
 	assert(entryScript)
-	
+
 	local task = ocaleSdk.createTask(apiKey, placeInfo, entryScript, tonumber(args:get("timeout")))
 	local completedTask = ocaleSdk.pollTaskCompletion(
 		apiKey,
@@ -151,9 +151,7 @@ return function(...)
 
 	if completedTask.state == "FAILED" then
 		local taskError = completedTask.error :: any
-		log.fatal(
-			`{richterm.red("✗", log.noColor())} Task failed with error: {taskError.code}\n{taskError.message}`
-		)
+		log.fatal(`{richterm.red("✗", log.noColor())} Task failed with error: {taskError.code}\n{taskError.message}`)
 	elseif completedTask.state == "CANCELLED" then
 		log.fatal(`{richterm.red("✗", log.noColor())} Task was cancelled`)
 	end
