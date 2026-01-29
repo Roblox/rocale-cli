@@ -2,7 +2,7 @@ local args = { ... }
 local version = args[2] or "unknown"
 local hash = args[3] or "unknown"
 
-local fs = require("@lute/fs")
+local fs = require("@std/fs")
 local system = require("@lute/system")
 
 local log = require("../src/util/log")

@@ -33,7 +33,7 @@ FLAGS:
 end
 
 return function(...)
-	local fs = require("@lute/fs")
+	local fs = require("@std/fs")
 	local process = require("@lute/process")
 
 	local richterm = require("@batteries/richterm")
