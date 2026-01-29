@@ -11,7 +11,7 @@ log.setLevel("debug")
 local runProcess = require("../src/util/runProcess")
 
 if not fs.exists("build") then
-	fs.mkdir("build")
+	fs.createdirectory("build")
 end
 
 local output_path = "build/rocale-cli"
