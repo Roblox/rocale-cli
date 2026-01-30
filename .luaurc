@@ -4,6 +4,6 @@
         "std": "~/.lute/typedefs/0.1.0/std", 
         "lint": "~/.lute/typedefs/0.1.0/lint", 
         "lute": "~/.lute/typedefs/0.1.0/lute",
-        "batteries": "src/batteries"
+        "batteries": "./src/batteries"
     }
 }
