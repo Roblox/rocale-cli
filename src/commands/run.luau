@@ -1,14 +1,14 @@
 local function help()
 	print([[
 rocale-cli run
-Build, upload, and run a Roblox project in OCALE
+Build, upload, and run a Roblox project in Open Cloud
 
 USAGE:
   rocale-cli run [options]
 
 REQUIRED:
-  -u, --universeId <id>    Target universe ID to spawn an OCALE instance of
-  -p, --placeId <id>       Target place ID to spawn an OCALE instance of
+  -u, --universeId <id>    Target universe ID to spawn an Open Cloud instance of
+  -p, --placeId <id>       Target place ID to spawn an Open Cloud instance of
   --apiKey <key>           Roblox API key (or set ROBLOX_API_KEY env var)
 
 LOAD OPTIONS:

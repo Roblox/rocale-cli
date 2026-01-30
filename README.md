@@ -1,6 +1,6 @@
 # rocale-cli
 
-A command-line tool for building, uploading, and running Roblox projects in OCALE.
+A command-line tool for building, uploading, and running Roblox projects via Roblox's [Open Cloud APIs for Luau Execution](https://create.roblox.com/docs/cloud/reference/features/luau-execution).
 
 ## Usage
 
