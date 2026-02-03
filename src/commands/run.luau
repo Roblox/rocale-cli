@@ -7,28 +7,29 @@ USAGE:
   rocale-cli run [options]
 
 REQUIRED:
-  -u, --universeId <id>    Target universe ID to spawn an Open Cloud instance of
-  -p, --placeId <id>       Target place ID to spawn an Open Cloud instance of
-  --apiKey <key>           Roblox API key (or set ROBLOX_API_KEY env var)
+  -u, --universeId <id>      Target universe ID to spawn an Open Cloud instance of
+  -p, --placeId <id>         Target place ID to spawn an Open Cloud instance of
+  --apiKey <key>             Roblox API key (or set ROBLOX_API_KEY env var)
 
 LOAD OPTIONS:
-  --load.project <file>    Rojo project.json/rbxp to build and load (requires rojo or robloxdev-cli)
-  --load.place <file>      Load an rbxl
-  --load.version <num>     Load existing place version without building/uploading
-                           (set to 0 to rerun last uploaded version)
+  --load.project <file>      Rojo project.json/rbxp to build and load (requires rojo or robloxdev-cli)
+  --load.place <file>        Load an rbxl
+  --load.version <num>       Load existing place version without building/uploading
+                             (set to 0 to rerun last uploaded version)
 
 BUILD OPTIONS:
-  --output <file>          Output file path for the built place file
-                           (default: output.rbxl)
-  --script <file>          Luau script to load and set as entrypoint
+  --output <file>            Output file path for the built place file
+                             (default: output.rbxl)
+  --script <file>            Luau script to load and set as entrypoint
 
 EXECUTION OPTIONS:
-  --timeout <seconds>      Timeout for polling task completion (default: 300)
-  --pollInterval <seconds> Interval between polling attempts (default: 2)
+  --timeout <seconds>        Timeout for polling task completion (default: 300)
+  --pollInterval <seconds>   Interval between polling attempts (default: 2)
+  --binaryOutput <file>      Path to save binary output from the task
 
 FLAGS:
-  -v, --verbose            Enable verbose logging
-  --help                   Show this help message
+  -v, --verbose              Enable verbose logging
+  --help                     Show this help message
 ]])
 end
 
@@ -56,6 +57,7 @@ return function(...)
 	args:add("apiKey", "option")
 	args:add("timeout", "option", { default = "300" })
 	args:add("pollInterval", "option", { default = "2" })
+	args:add("binaryOutput", "option", { default = nil })
 	args:add("verbose", "flag", { aliases = { "v" } })
 	args:add("help", "flag")
 
@@ -138,7 +140,12 @@ return function(...)
 	end
 	assert(entryScript)
 
-	local task = ocaleSdk.createTask(apiKey, placeInfo, entryScript, tonumber(args:get("timeout")))
+	local enableBinaryOutput = false
+	if args:get("binaryOutput") then
+		enableBinaryOutput = true
+	end
+
+	local task = ocaleSdk.createTask(apiKey, placeInfo, entryScript, tonumber(args:get("timeout")), nil, enableBinaryOutput)
 	local completedTask = ocaleSdk.pollTaskCompletion(
 		apiKey,
 		task.path,
@@ -148,6 +155,12 @@ return function(...)
 
 	local logs = ocaleSdk.getTaskLogs(apiKey, completedTask.path)
 	print(table.concat(logs, "\n"))
+
+	if enableBinaryOutput and completedTask.binaryOutputUri then
+		local binaryOutput = ocaleSdk.getBinaryOutput(completedTask.binaryOutputUri)
+		fs.writestringtofile(args:get("binaryOutput"), binaryOutput)
+		log.info(`{richterm.green("✓", log.noColor())} Binary output saved to '{args:get("binaryOutput")}'`)
+	end
 
 	if completedTask.state == "FAILED" then
 		local taskError = completedTask.error :: any

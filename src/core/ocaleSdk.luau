@@ -82,7 +82,7 @@ export type TaskResponse = {
 	output: {
 		results: { any },
 	},
-	enableBinaryOutput: true,
+	enableBinaryOutput: boolean,
 	binaryInput: string?,
 	binaryOutputUri: string?,
 }
@@ -178,6 +178,7 @@ function OcaleSDK.pollTaskCompletion(
 end
 
 function OcaleSDK.getBinaryOutput(binaryOutputUri: string): string
+	log.debug(`Binary output URI: {binaryOutputUri}`)
 	local response = net.request(binaryOutputUri, {
 		method = "GET",
 	})

@@ -1,4 +1,5 @@
 local process = require("@lute/process")
+local fs = require("@std/fs")
 
 local log = require("../src/util/log")
 log.setLevel("debug")
@@ -16,5 +17,11 @@ runProcess({
 	process.env.TEST_UNIVERSE_ID,
 	"--load.project",
 	"tests/test.project.json",
+	"--binaryOutput",
+	"build/testOutput.txt",
 	"--verbose",
 })
+
+local testOutput = fs.readfiletostring("build/testOutput.txt")
+fs.remove("build/testOutput.txt")
+assert(testOutput == "Hello, World!", `Expected binary output to be "Hello, World!"`)
