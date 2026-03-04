@@ -101,15 +101,15 @@ function OcaleSDK.createTask(
 	local entryScript = fs.readfiletostring(scriptPath)
 
 	-- inject globals at the top of the entry script
-	if luaGlobals and next(luaGlobals) then
+	if luaGlobals then
 		local keys: { string } = {}
 		local values: { string } = {}
 		for key, value in pairs(luaGlobals) do
 			table.insert(keys, `_G[{string.format("%q", key)}]`)
 			table.insert(values, string.format("%q", value))
 		end
-		local assignGlobalsString = table.concat(keys, ", ") .. " = " .. table.concat(values, ", ") .. "\n"
-		entryScript = assignGlobalsString .. entryScript
+		local assignGlobals = table.concat(keys, ", ") .. " = " .. table.concat(values, ", ") .. "\n"
+		entryScript = assignGlobals .. entryScript
 	end
 
 	local req: net.Metadata = {

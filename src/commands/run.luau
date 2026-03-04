@@ -164,8 +164,15 @@ return function(...)
 	assert(binaryOutputPath, "Binary output path should be a valid file path")
 	local enableBinaryOutput = binaryOutputPath ~= nil
 
-	local task =
-		ocaleSdk.createTask(apiKey, placeInfo, entryScript, tonumber(args:get("timeout")), nil, enableBinaryOutput, luaGlobals)
+	local task = ocaleSdk.createTask(
+		apiKey,
+		placeInfo,
+		entryScript,
+		tonumber(args:get("timeout")),
+		nil,
+		enableBinaryOutput,
+		luaGlobals
+	)
 	local completedTask = ocaleSdk.pollTaskCompletion(
 		apiKey,
 		task.path,
