@@ -7,29 +7,30 @@ USAGE:
   rocale-cli run [options]
 
 REQUIRED:
-  -u, --universeId <id>      Target universe ID to spawn an Open Cloud instance of
-  -p, --placeId <id>         Target place ID to spawn an Open Cloud instance of
-  --apiKey <key>             Roblox API key (or set ROBLOX_API_KEY env var)
+  -u, --universeId <id>      	Target universe ID to spawn an Open Cloud instance of
+  -p, --placeId <id>         	Target place ID to spawn an Open Cloud instance of
+  --apiKey <key>            	Roblox API key (or set ROBLOX_API_KEY env var)
 
 LOAD OPTIONS:
-  --load.project <file>      Rojo project.json/rbxp to build and load (requires rojo or robloxdev-cli)
-  --load.place <file>        Load an rbxl
-  --load.version <num>       Load existing place version without building/uploading
-                             (set to 0 to rerun last uploaded version)
+  --load.project <file>      	Rojo project.json/rbxp to build and load (requires rojo or robloxdev-cli)
+  --load.place <file>       	Load an rbxl
+  --load.version <num>      	Load existing place version without building/uploading
+                            	(set to 0 to rerun last uploaded version)
 
 BUILD OPTIONS:
-  --output <file>            Output file path for the built place file
-                             (default: output.rbxl)
-  --script <file>            Luau script to load and set as entrypoint
+  --output <file>            	Output file path for the built place file
+                             	(default: output.rbxl)
+  --script <file>            	Luau script to load and set as entrypoint
 
 EXECUTION OPTIONS:
-  --timeout <seconds>        Timeout for polling task completion (default: 300)
-  --pollInterval <seconds>   Interval between polling attempts (default: 2)
-  --binaryOutput <file>      Path to save binary output from the task
+  --lua.globals <key=value,...>	Comma-separated list of Lua globals to inject
+  --timeout <seconds>        	Timeout for polling task completion (default: 300)
+  --pollInterval <seconds>   	Interval between polling attempts (default: 2)
+  --binaryOutput <file>      	Path to save binary output from the task
 
 FLAGS:
-  -v, --verbose              Enable verbose logging
-  --help                     Show this help message
+  -v, --verbose              	Enable verbose logging
+  --help                     	Show this help message
 ]])
 end
 
@@ -55,6 +56,7 @@ return function(...)
 	args:add("load.version", "option")
 	args:add("load.place", "option")
 	args:add("apiKey", "option")
+	args:add("lua.globals", "option", { default = nil })
 	args:add("timeout", "option", { default = "300" })
 	args:add("pollInterval", "option", { default = "2" })
 	args:add("binaryOutput", "option", { default = nil })
@@ -75,6 +77,21 @@ return function(...)
 	local apiKey = process.env.ROBLOX_API_KEY
 		or args:get("apiKey")
 		or log.fatal("Missing API Key: Set ROBLOX_API_KEY environment variable or provide it as an argument")
+
+	local luaGlobals = {}
+	if args:get("lua.globals") then
+		local globals = args:get("lua.globals")
+		assert(globals, "Expected globals to be a comma-separated list of key=value pairs")
+
+		for _, pair in ipairs(string.split(globals, ",")) do
+			local key, value = pair:match("([^=]+)=([^=]+)")
+			if key and value then
+				luaGlobals[key] = value
+			else
+				log.fatal("Expected format for globals is key=value")
+			end
+		end
+	end
 
 	local placeInfo: ocaleSdk.PlaceInfo = {
 		universeId = tonumber(args:get("universeId")) or log.fatal("Missing a universe ID"),
@@ -140,12 +157,15 @@ return function(...)
 	end
 	assert(entryScript)
 
-	local enableBinaryOutput = false
+	local binaryOutputPath = nil
 	if args:get("binaryOutput") then
-		enableBinaryOutput = true
+		binaryOutputPath = args:get("binaryOutput")
 	end
+	assert(binaryOutputPath, "Binary output path should be a valid file path")
+	local enableBinaryOutput = binaryOutputPath ~= nil
 
-	local task = ocaleSdk.createTask(apiKey, placeInfo, entryScript, tonumber(args:get("timeout")), nil, enableBinaryOutput)
+	local task =
+		ocaleSdk.createTask(apiKey, placeInfo, entryScript, tonumber(args:get("timeout")), nil, enableBinaryOutput, luaGlobals)
 	local completedTask = ocaleSdk.pollTaskCompletion(
 		apiKey,
 		task.path,
@@ -158,8 +178,8 @@ return function(...)
 
 	if enableBinaryOutput and completedTask.binaryOutputUri then
 		local binaryOutput = ocaleSdk.getBinaryOutput(completedTask.binaryOutputUri)
-		fs.writestringtofile(args:get("binaryOutput"), binaryOutput)
-		log.info(`{richterm.green("✓", log.noColor())} Binary output saved to '{args:get("binaryOutput")}'`)
+		fs.writestringtofile(binaryOutputPath, binaryOutput)
+		log.info(`{richterm.green("✓", log.noColor())} Binary output saved to '{binaryOutputPath}'`)
 	end
 
 	if completedTask.state == "FAILED" then

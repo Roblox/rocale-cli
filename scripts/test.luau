@@ -17,6 +17,8 @@ runProcess({
 	process.env.TEST_UNIVERSE_ID,
 	"--load.project",
 	"tests/test.project.json",
+	"--lua.globals",
+	"HELLO_GLOBAL=hello,WORLD_GLOBAL=world!",
 	"--binaryOutput",
 	"build/testOutput.txt",
 	"--verbose",
