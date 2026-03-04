@@ -108,7 +108,7 @@ function OcaleSDK.createTask(
 			table.insert(keys, `_G[{string.format("%q", key)}]`)
 			table.insert(values, string.format("%q", value))
 		end
-		local assignGlobals = table.concat(keys, ", ") .. " = " .. table.concat(values, ", ") .. "\n"
+		local assignGlobals = table.concat(keys, ",") .. "=" .. table.concat(values, ",") .. " "
 		entryScript = assignGlobals .. entryScript
 	end
 
