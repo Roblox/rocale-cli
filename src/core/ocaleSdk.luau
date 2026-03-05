@@ -86,26 +86,43 @@ export type TaskResponse = {
 	binaryInput: string?,
 	binaryOutputUri: string?,
 }
+
 function OcaleSDK.createTask(
 	apiKey: string,
 	placeInfo: PlaceInfo,
 	scriptPath: string,
 	timeout: number?,
 	binaryInputPath: string?,
-	enableBinaryOutput: boolean?
+	enableBinaryOutput: boolean?,
+	luaGlobals: { [string]: string }?
 ): TaskResponse
 	log.info(`{richterm.blue("→", log.noColor())} Creating the OCALE task...`)
 	local url = getCreateTaskPath(placeInfo)
+	local entryScript = fs.readfiletostring(scriptPath)
+
+	-- inject globals at the top of the entry script
+	if luaGlobals then
+		local keys: { string } = {}
+		local values: { string } = {}
+		for key, value in pairs(luaGlobals) do
+			table.insert(keys, `_G[{string.format("%q", key)}]`)
+			table.insert(values, string.format("%q", value))
+		end
+		local assignGlobals = table.concat(keys, ",") .. "=" .. table.concat(values, ",") .. " "
+		entryScript = assignGlobals .. entryScript
+	end
+
 	local req: net.Metadata = {
 		method = "POST",
 		headers = { ["x-api-key"] = apiKey, ["content-type"] = "application/json" },
 		body = json.serialize({
-			script = fs.readfiletostring(scriptPath),
+			script = entryScript,
 			binaryInput = binaryInputPath,
 			enableBinaryOutput = enableBinaryOutput,
 			timeout = `{timeout}s`,
 		}),
 	}
+
 	log.debug(`Request URL: {url}`)
 	local response = net.request(url, req)
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
