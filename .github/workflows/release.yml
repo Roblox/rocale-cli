@@ -24,18 +24,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate access token
-        uses: Roblox-ActionsCache/tibdex-github-app-token@v1.4.0
-        id: setup_token
-        with:
-          app_id: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_ID }}
-          private_key: ${{ secrets.TOKENS_APP_LUA_ECOSYSTEM_DEPENDENCIES_KEY }}
+      - name: Set up foreman.toml for publishing
+        run: |
+          cp foreman-release.toml foreman.toml
 
       - name: Get foreman and run foreman install
         uses: Roblox/setup-foreman@v3
         with:
           version: "^1.0.0"
-          token: ${{ steps.setup_token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           allow-external-github-orgs: true
 
       - name: Build release artifacts

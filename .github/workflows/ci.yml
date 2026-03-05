@@ -22,10 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up external foreman
-        run: |
-          cp foreman-extern.toml foreman.toml
-
       - name: Get foreman and run foreman install
         uses: Roblox/setup-foreman@v3
         with:
