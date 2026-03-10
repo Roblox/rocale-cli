@@ -160,8 +160,8 @@ return function(...)
 	local binaryOutputPath = nil
 	if args:get("binaryOutput") then
 		binaryOutputPath = args:get("binaryOutput")
+		assert(binaryOutputPath, "Binary output path should be a valid file path")
 	end
-	assert(binaryOutputPath, "Binary output path should be a valid file path")
 	local enableBinaryOutput = binaryOutputPath ~= nil
 
 	local task = ocaleSdk.createTask(
