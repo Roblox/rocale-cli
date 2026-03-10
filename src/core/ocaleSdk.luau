@@ -101,7 +101,7 @@ function OcaleSDK.createTask(
 	local entryScript = fs.readfiletostring(scriptPath)
 
 	-- inject globals at the top of the entry script
-	if luaGlobals then
+	if luaGlobals and next(luaGlobals) then
 		local keys: { string } = {}
 		local values: { string } = {}
 		for key, value in pairs(luaGlobals) do
