@@ -160,7 +160,6 @@ return function(...)
 	local binaryOutputPath = nil
 	if args:get("binaryOutput") then
 		binaryOutputPath = args:get("binaryOutput")
-		assert(binaryOutputPath, "Binary output path should be a valid file path")
 	end
 	local enableBinaryOutput = binaryOutputPath ~= nil
 
@@ -185,6 +184,7 @@ return function(...)
 
 	if enableBinaryOutput and completedTask.binaryOutputUri then
 		local binaryOutput = ocaleSdk.getBinaryOutput(completedTask.binaryOutputUri)
+		assert(binaryOutputPath, "Binary output path should be a valid file path")
 		fs.writestringtofile(binaryOutputPath, binaryOutput)
 		log.info(`{richterm.green("✓", log.noColor())} Binary output saved to '{binaryOutputPath}'`)
 	end

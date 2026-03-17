@@ -26,4 +26,20 @@ runProcess({
 
 local testOutput = fs.readfiletostring("build/testOutput.txt")
 fs.remove("build/testOutput.txt")
-assert(testOutput == "Hello, World!", `Expected binary output to be "Hello, World!"`)
+assert(testOutput == "hello world!", `Expected binary output to be "hello world!"`)
+
+log.info("Rerunning tests using load.version and without optional variables")
+
+runProcess({
+	"build/rocale-cli",
+	"run",
+	"--script",
+	"tests/run-test-project.luau",
+	"--placeId",
+	process.env.TEST_PLACE_ID,
+	"--universeId",
+	process.env.TEST_UNIVERSE_ID,
+	"--load.version",
+	"0",
+	"--verbose",
+})
