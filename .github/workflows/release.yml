@@ -59,7 +59,7 @@ jobs:
           zip -rj rocale-cli-linux-x86_64.zip ./artifacts/rocale-cli-linux-x86_64/*
           zip -rj rocale-cli-windows-x86_64.zip ./artifacts/rocale-cli-windows-x86_64/*
 
-      - uses: Roblox-ActionsCache/softprops-action-gh-release@v1
+      - uses: softprops/action-gh-release@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
