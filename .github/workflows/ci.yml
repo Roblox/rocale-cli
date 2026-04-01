@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    environment: CI
     name: Test - ${{ matrix.os }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 1
