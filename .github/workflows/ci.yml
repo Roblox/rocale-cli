@@ -1,9 +1,6 @@
 name: CI
 
 on:
-  pull_request:
-    branches:
-      - master
   pull_request_target:
     branches:
       - master
@@ -27,6 +24,8 @@ jobs:
             runner: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - name: Get foreman and run foreman install
         uses: Roblox/setup-foreman@v3
