@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    environment: CI
+    environment: ${{ github.event_name == 'pull_request_target' && 'CI' || null }}
     name: Test - ${{ matrix.os }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 1
