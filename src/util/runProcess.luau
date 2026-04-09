@@ -4,14 +4,18 @@ local system = require("@lute/system")
 local log = require("../util/log")
 
 return function(cmd: { string })
-	if string.lower(system.os) == "windows_nt" then
+	local isWin32 = string.lower(system.os) == "windows_nt"
+	if isWin32 then
 		cmd[1] = cmd[1] .. ".exe"
 	end
 	local cmdStr = table.concat(cmd, " ")
 	log.debug(`Running command: {cmdStr}`)
 
 	local ok, result = pcall(function()
-		return process.run(cmd, { stdio = "inherit", env = { PATH = `{process.cwd()}:{process.env.PATH}` } })
+		return process.run(
+			cmd,
+			{ stdio = "inherit", env = { PATH = `{process.cwd()}{if isWin32 then ";" else ":"}{process.env.PATH}` } }
+		)
 	end)
 
 	if ok and result.ok then
