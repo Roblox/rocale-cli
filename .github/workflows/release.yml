@@ -13,12 +13,15 @@ jobs:
       matrix:
         include:
           - os: macos
+            arch: arm64
             runner: macos-latest
             artifact_path: "build/rocale-cli"
           - os: linux
+            arch: x86_64
             runner: ubuntu-latest
             artifact_path: "build/rocale-cli"
           - os: windows
+            arch: x86_64
             runner: windows-latest
             artifact_path: "build/rocale-cli.exe"
     steps:
@@ -41,7 +44,7 @@ jobs:
 
       - uses: actions/upload-artifact@v5
         with:
-          name: rocale-cli-${{ matrix.os }}-x86_64
+          name: rocale-cli-${{ matrix.os }}-${{ matrix.arch }}
           path: ${{ matrix.artifact_path }}
 
   release:
@@ -55,7 +58,7 @@ jobs:
       
       - name: Zip release artifacts
         run: |
-          zip -rj rocale-cli-macos-arm64.zip ./artifacts/rocale-cli-macos-x86_64/*
+          zip -rj rocale-cli-macos-arm64.zip ./artifacts/rocale-cli-macos-arm64/*
           zip -rj rocale-cli-linux-x86_64.zip ./artifacts/rocale-cli-linux-x86_64/*
           zip -rj rocale-cli-windows-x86_64.zip ./artifacts/rocale-cli-windows-x86_64/*
 
