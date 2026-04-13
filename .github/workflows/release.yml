@@ -51,20 +51,55 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     needs: build
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v5
         with:
           path: artifacts
-      
+
       - name: Zip release artifacts
         run: |
           zip -rj rocale-cli-macos-arm64.zip ./artifacts/rocale-cli-macos-arm64/*
           zip -rj rocale-cli-linux-x86_64.zip ./artifacts/rocale-cli-linux-x86_64/*
           zip -rj rocale-cli-windows-x86_64.zip ./artifacts/rocale-cli-windows-x86_64/*
 
-      - uses: softprops/action-gh-release@v1
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
           draft: true
-          files: |
-            rocale-cli-*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload macOS artifact
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rocale-cli-macos-arm64.zip
+          asset_name: rocale-cli-macos-arm64.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux artifact
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rocale-cli-linux-x86_64.zip
+          asset_name: rocale-cli-linux-x86_64.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows artifact
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: rocale-cli-windows-x86_64.zip
+          asset_name: rocale-cli-windows-x86_64.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
