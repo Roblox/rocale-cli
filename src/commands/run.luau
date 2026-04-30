@@ -34,6 +34,10 @@ FLAGS:
 ]])
 end
 
+local function toBoolNum(v: any): number
+	return if v then 1 else 0
+end
+
 return function(...)
 	local fs = require("@std/fs")
 	local process = require("@lute/process")
@@ -83,7 +87,7 @@ return function(...)
 		local globals = args:get("lua.globals")
 		assert(globals, "Expected globals to be a comma-separated list of key=value pairs")
 
-		for _, pair in ipairs(string.split(globals, ",")) do
+		for _, pair in string.split(globals, ",") do
 			local key, value = pair:match("([^=]+)=([^=]+)")
 			if key and value then
 				luaGlobals[key] = value
@@ -98,11 +102,12 @@ return function(...)
 		placeId = tonumber(args:get("placeId")) or log.fatal("Missing a place ID"),
 	}
 
+	--stylua: ignore
 	if
 		(
-			(args:get("load.place") and 1 or 0)
-			+ (args:get("load.version") and 1 or 0)
-			+ (args:get("load.project") and 1 or 0)
+			toBoolNum(args:get("load.place"))
+			+ toBoolNum(args:get("load.version"))
+			+ toBoolNum(args:get("load.project"))
 		) > 1
 	then
 		log.fatal("Cannot specify more than one --load option")

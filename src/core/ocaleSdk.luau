@@ -6,6 +6,13 @@ local task = require("@lute/task")
 local log = require("../util/log")
 local richterm = require("@batteries/richterm")
 
+local boldYellowFormatter = richterm.combine(richterm.yellow, richterm.bold)
+local spinnerChars = table.freeze({ "|", "/", "-", "\\" })
+
+local function formatSeconds(s: number): string
+	return string.format("%.1fs", s)
+end
+
 local OcaleSDK = {}
 
 export type BinaryInputResponse = { path: string, size: number, uploadUri: string }
@@ -102,14 +109,12 @@ function OcaleSDK.createTask(
 
 	-- inject globals at the top of the entry script
 	if luaGlobals and next(luaGlobals) then
-		local keys: { string } = {}
-		local values: { string } = {}
-		for key, value in pairs(luaGlobals) do
-			table.insert(keys, `_G[{string.format("%q", key)}]`)
-			table.insert(values, string.format("%q", value))
+		local globalAssignments: { string } = {}
+
+		for key, value in luaGlobals do
+			table.insert(globalAssignments, `_G["{key}"]="{value}";`)
 		end
-		local assignGlobals = table.concat(keys, ",") .. "=" .. table.concat(values, ",") .. " "
-		entryScript = assignGlobals .. entryScript
+		entryScript = table.concat(globalAssignments) .. entryScript
 	end
 
 	local req: net.Metadata = {
@@ -141,21 +146,19 @@ function OcaleSDK.pollTaskCompletion(
 	local timeRemaining = timeout or 300
 	local interval = pollInterval or 2
 
-	local spinnerChars = { "|", "/", "-", "\\" }
-	local spinnerIndex = 1
-	local spinner = richterm.yellow(spinnerChars[spinnerIndex], log.noColor())
-
 	local startTime = os.clock()
-	local elapsed = string.format("%.1f", os.clock() - startTime)
 	log.info(`Polling for OCALE task completion`)
 
 	if not log.noColor() then
 		task.spawn(function()
+			local spinnerIndex = 1
+
 			while timeRemaining > 0 do
-				spinner = richterm.bold(richterm.yellow(spinnerChars[spinnerIndex], log.noColor()))
-				elapsed = string.format("%.1f", os.clock() - startTime)
-				log.update(`{spinner} {richterm.dim(`[{elapsed}s]`, log.noColor())} Polling for OCALE task completion`)
-				spinnerIndex = spinnerIndex % #spinnerChars + 1
+				local spinner = boldYellowFormatter(spinnerChars[spinnerIndex], log.noColor())
+				local elapsed = formatSeconds(os.clock() - startTime)
+
+				log.update(`{spinner} {richterm.dim(`[{elapsed}]`, log.noColor())} Polling for OCALE task completion`)
+				spinnerIndex = (spinnerIndex % 4) + 1
 				task.wait(0.1)
 			end
 		end)
@@ -177,9 +180,9 @@ function OcaleSDK.pollTaskCompletion(
 		if body.state ~= "PROCESSING" then
 			timeRemaining = 0
 			task.wait(0.1)
-			elapsed = string.format("%.1f", os.clock() - startTime)
+			local elapsed = formatSeconds(os.clock() - startTime)
 			log.info(
-				`{richterm.green("✓", log.noColor())} {richterm.dim(`[{elapsed}s]`, log.noColor())} OCALE task completed`
+				`{richterm.green("✓", log.noColor())} {richterm.dim(`[{elapsed}]`, log.noColor())} OCALE task completed`
 			)
 			return body
 		end
@@ -188,9 +191,10 @@ function OcaleSDK.pollTaskCompletion(
 	end
 
 	timeRemaining = 0
-	elapsed = string.format("%.1f", os.clock() - startTime)
+	local elapsed = formatSeconds(os.clock() - startTime)
+	--stylua: ignore
 	return log.fatal(
-		`{richterm.red("✗", log.noColor())} {richterm.dim(`[{elapsed}s]`, log.noColor())} Task timed out`
+		`{richterm.red("✗", log.noColor())} {richterm.dim(`[{elapsed}]`, log.noColor())} Task timed out`
 	)
 end
 
@@ -217,4 +221,4 @@ function OcaleSDK.getTaskLogs(apiKey: string, taskPath: string): { string }
 	return logs
 end
 
-return OcaleSDK
+return table.freeze(OcaleSDK)
