@@ -24,7 +24,7 @@ runProcess({
 	"--verbose",
 })
 
-local testOutput = fs.readfiletostring("build/testOutput.txt")
+local testOutput = fs.readFileToString("build/testOutput.txt")
 fs.remove("build/testOutput.txt")
 assert(testOutput == "hello world!", `Expected binary output to be "hello world!"`)
 

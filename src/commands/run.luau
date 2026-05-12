@@ -185,7 +185,7 @@ return function(...)
 	if enableBinaryOutput and completedTask.binaryOutputUri then
 		local binaryOutput = ocaleSdk.getBinaryOutput(completedTask.binaryOutputUri)
 		assert(binaryOutputPath, "Binary output path should be a valid file path")
-		fs.writestringtofile(binaryOutputPath, binaryOutput)
+		fs.writeStringToFile(binaryOutputPath, binaryOutput)
 		log.info(`{richterm.green("✓", log.noColor())} Binary output saved to '{binaryOutputPath}'`)
 	end
 
