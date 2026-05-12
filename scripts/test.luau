@@ -6,7 +6,7 @@ log.setLevel("debug")
 
 local runProcess = require("../src/util/runProcess")
 
-runProcess({
+runProcess(
 	"build/rocale-cli",
 	"run",
 	"--script",
@@ -21,8 +21,8 @@ runProcess({
 	"HELLO_GLOBAL=hello,WORLD_GLOBAL=world!",
 	"--binaryOutput",
 	"build/testOutput.txt",
-	"--verbose",
-})
+	"--verbose"
+)
 
 local testOutput = fs.readfiletostring("build/testOutput.txt")
 fs.remove("build/testOutput.txt")

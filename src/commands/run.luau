@@ -131,16 +131,16 @@ return function(...)
 		assert(outputPath, "Missing output file path")
 
 		if projectFile:match("%.project%.json$") then
-			runProcess({ "rojo", "build", projectFile, "--output", outputPath })
+			runProcess("rojo", "build", projectFile, "--output", outputPath)
 		elseif projectFile:match("%.rbxp$") then
-			runProcess({
+			runProcess(
 				"robloxdev-cli",
 				"pack",
 				"--input",
 				projectFile,
 				"--output",
-				outputPath,
-			})
+				outputPath
+			)
 		else
 			log.fatal(`Unsupported project file: '{projectFile}'. Must be a 'project.json' or '.rbxp' file.`)
 		end
