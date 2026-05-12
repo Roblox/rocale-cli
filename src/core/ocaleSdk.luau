@@ -44,8 +44,8 @@ function OcaleSDK.uploadPlaceFile(filePath: string, placeInfo: PlaceInfo, apiKey
 	local url =
 		`https://apis.roblox.com/universes/v1/{placeInfo.universeId}/places/{placeInfo.placeId}/versions?versionType=Saved`
 	log.debug(`Request URL: {url}`)
-	local isBinary = string.match(filePath, "%.rbxl$") ~= nil
-	local contentType = if isBinary then "application/octet-stream" else "application/xml"
+	local isXml = string.match(filePath, "%.rbxlx$") ~= nil
+	local contentType = if isXml then "application/xml" else "application/octet-stream"
 	local response = client.request(url, {
 		method = "POST",
 		headers = {
