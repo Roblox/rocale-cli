@@ -1,4 +1,4 @@
-local net = require("@lute/net")
+local client = require("@lute/net/client")
 local json = require("@std/json")
 local fs = require("@std/fs")
 local task = require("@lute/task")
@@ -17,9 +17,9 @@ local OcaleSDK = {}
 
 export type BinaryInputResponse = { path: string, size: number, uploadUri: string }
 function OcaleSDK.createBinaryInput(apiKey: string, universeId: number, filePath: string): BinaryInputResponse
-	local fileSize = #fs.readfiletostring(filePath)
+	local fileSize = #fs.readFileToString(filePath)
 
-	local response = net.request(
+	local response = client.request(
 		`https://apis.roblox.com/cloud/v2/universes/{universeId}/luau-execution-session-task-binary-inputs`,
 		{
 			method = "POST",
@@ -32,10 +32,10 @@ function OcaleSDK.createBinaryInput(apiKey: string, universeId: number, filePath
 end
 
 function OcaleSDK.uploadBinaryFile(uploadUri: string, filePath: string)
-	local response = net.request(uploadUri, {
+	local response = client.request(uploadUri, {
 		method = "PUT",
 		headers = { ["content-type"] = "application/octet-stream" },
-		body = fs.readfiletostring(filePath),
+		body = fs.readFileToString(filePath),
 	})
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 end
@@ -51,14 +51,16 @@ function OcaleSDK.uploadPlaceFile(filePath: string, placeInfo: PlaceInfo, apiKey
 	local url =
 		`https://apis.roblox.com/universes/v1/{placeInfo.universeId}/places/{placeInfo.placeId}/versions?versionType=Saved`
 	log.debug(`Request URL: {url}`)
-	local response = net.request(url, {
+	local isXml = string.match(filePath, "%.rbxlx$") ~= nil
+	local contentType = if isXml then "application/xml" else "application/octet-stream"
+	local response = client.request(url, {
 		method = "POST",
 		headers = {
 			["x-api-key"] = apiKey,
-			["content-type"] = "application/xml",
+			["content-type"] = contentType,
 			["Accept"] = "application/json",
 		},
-		body = fs.readfiletostring(filePath),
+		body = fs.readFileToString(filePath),
 	})
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 	log.debug(`Response body: {log.pretty(response.body)}`)
@@ -105,7 +107,7 @@ function OcaleSDK.createTask(
 ): TaskResponse
 	log.info(`{richterm.blue("→", log.noColor())} Creating the OCALE task...`)
 	local url = getCreateTaskPath(placeInfo)
-	local entryScript = fs.readfiletostring(scriptPath)
+	local entryScript = fs.readFileToString(scriptPath)
 
 	-- inject globals at the top of the entry script
 	if luaGlobals and next(luaGlobals) then
@@ -117,7 +119,7 @@ function OcaleSDK.createTask(
 		entryScript = table.concat(globalAssignments) .. entryScript
 	end
 
-	local req: net.Metadata = {
+	local req: client.Metadata = {
 		method = "POST",
 		headers = { ["x-api-key"] = apiKey, ["content-type"] = "application/json" },
 		body = json.serialize({
@@ -129,7 +131,7 @@ function OcaleSDK.createTask(
 	}
 
 	log.debug(`Request URL: {url}`)
-	local response = net.request(url, req)
+	local response = client.request(url, req)
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
 	local taskResponse = json.deserialize(response.body) :: TaskResponse
 	log.debug(`Task path: {taskResponse.path}`)
@@ -167,7 +169,7 @@ function OcaleSDK.pollTaskCompletion(
 	while timeRemaining > 0 do
 		timeRemaining = timeRemaining - interval
 
-		local response = net.request(`https://apis.roblox.com/cloud/v2/{taskPath}`, {
+		local response = client.request(`https://apis.roblox.com/cloud/v2/{taskPath}`, {
 			method = "GET",
 			headers = { ["x-api-key"] = apiKey },
 		})
@@ -200,7 +202,7 @@ end
 
 function OcaleSDK.getBinaryOutput(binaryOutputUri: string): string
 	log.debug(`Binary output URI: {binaryOutputUri}`)
-	local response = net.request(binaryOutputUri, {
+	local response = client.request(binaryOutputUri, {
 		method = "GET",
 	})
 	log.fatalif(not response.ok, `{response.status} - {response.body}`)
@@ -208,7 +210,7 @@ function OcaleSDK.getBinaryOutput(binaryOutputUri: string): string
 end
 
 function OcaleSDK.getTaskLogs(apiKey: string, taskPath: string): { string }
-	local response = net.request(`https://apis.roblox.com/cloud/v2/{taskPath}/logs`, {
+	local response = client.request(`https://apis.roblox.com/cloud/v2/{taskPath}/logs`, {
 		method = "GET",
 		headers = { ["x-api-key"] = apiKey },
 	})
