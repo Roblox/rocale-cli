@@ -30,7 +30,7 @@ assert(testOutput == "hello world!", `Expected binary output to be "hello world!
 
 log.info("Rerunning tests using load.version and without optional variables")
 
-runProcess({
+runProcess(
 	"build/rocale-cli",
 	"run",
 	"--script",
@@ -41,5 +41,5 @@ runProcess({
 	process.env.TEST_UNIVERSE_ID,
 	"--load.version",
 	"0",
-	"--verbose",
-})
+	"--verbose"
+)
