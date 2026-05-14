@@ -9,6 +9,7 @@ local log = {}
 
 type Level = "trace" | "debug" | "info" | "warn" | "error"
 
+local dimBlueFormatter = richterm.combine(richterm.blue, richterm.dim)
 local currentLevel: Level = "info"
 
 local colorsEnabled = true -- set to false to disable colors
@@ -18,122 +19,69 @@ end
 
 local showCaller = true -- set to false to disable caller information
 
-local levels = {
+local levels = table.freeze({
 	trace = 1,
 	debug = 2,
 	info = 3,
 	warn = 4,
 	error = 5,
-} :: { [Level]: number }
+}) :: { [Level]: number }
+
+local function stringifyVararg(...: any): string
+	return table.concat({ ... }, " ")
+end
 
 function log.should(level: Level)
 	return levels[level] >= levels[currentLevel]
 end
 
--- Get caller information from debug traceback.
-local function getCallerInfo()
-	if not showCaller then
-		return ""
-	end
-	local traceback = debug.traceback()
-	local lines = string.split(traceback, "\n")
-
-	-- Look for the first line that's not in this logger module.
-	for _, line in ipairs(lines) do
-		if line:find("util/log") then
-			continue
-		end
-
-		return line
-	end
-
-	return "[unknown]"
-end
-
 function log.trace(...)
 	if log.should("trace") then
-		local l: string = ""
-		if colorsEnabled then
-			l = richterm.combine(richterm.blue, richterm.dim)("[TRACE] ")
-			print(l .. richterm.dim(... or ""))
-		else
-			l = "[TRACE] "
-			print(l .. (... or ""))
-		end
+		local prefix = dimBlueFormatter("[TRACE] ")
+		print(prefix .. richterm.dim(stringifyVararg(...), colorsEnabled))
 	end
 end
 
 function log.debug(...)
 	if log.should("debug") then
-		local l: string = ""
-		if colorsEnabled then
-			l = richterm.cyan("[DEBUG] ")
-			print(l .. richterm.dim(... or ""))
-		else
-			l = "[DEBUG] "
-			print(l .. (... or ""))
-		end
+		local prefix = richterm.cyan("[DEBUG] ", colorsEnabled)
+		print(prefix .. richterm.dim(stringifyVararg(...), colorsEnabled))
 	end
 end
 
 function log.info(...)
 	if log.should("info") then
-		local l: string = ""
-		if colorsEnabled then
-			l = richterm.green("[INFO]  ")
-		else
-			l = "[INFO]  "
-		end
-		print(l .. (... or ""))
+		local prefix = richterm.green("[INFO]  ", colorsEnabled)
+		print(prefix .. stringifyVararg(...))
 	end
 end
 
 function log.update(...)
 	if log.should("info") then
-		local l: string = ""
-		if colorsEnabled then
-			l = richterm.green("[INFO]  ")
-			print("\x1b[1A\x1b[2K" .. l .. (... or ""))
-		else
-			l = "[INFO]  "
-			print(l .. (... or ""))
-		end
+		local prefix = richterm.green("[INFO]  ", colorsEnabled)
+		print("\x1b[1A\x1b[2K" .. prefix .. stringifyVararg(...))
 	end
 end
 
 function log.warn(...)
 	if log.should("warn") then
-		local l: string = ""
-		if colorsEnabled then
-			l = richterm.yellow("[WARN]  ")
-		else
-			l = "[WARN]  "
-		end
-		print(l .. (... or ""))
+		local prefix = richterm.yellow("[WARN]  ", colorsEnabled)
+		print(prefix .. stringifyVararg(...))
 	end
 end
 
 function log.error(...)
 	if log.should("error") then
-		local l: string = ""
-		if colorsEnabled then
-			l = richterm.red("[ERROR] ")
-		else
-			l = "[ERROR] "
-		end
-		print(l .. (... or ""))
+		local prefix = richterm.red("[ERROR] ", colorsEnabled)
+		print(prefix .. stringifyVararg(...))
 	end
 end
 
 function log.fatal(...): never
-	local caller = getCallerInfo()
-	local l: string = ""
-	if colorsEnabled then
-		l = richterm.red("[FATAL] ")
-	else
-		l = "[FATAL] "
-	end
-	print(caller .. " | " .. l .. (... or "") .. "\n")
+	local prefix = richterm.red("[FATAL] ", colorsEnabled)
+	local message = prefix .. stringifyVararg(...)
+
+	print(if showCaller then debug.traceback(message, 2) else message)
 	process.exit(1)
 	return nil :: any
 end
@@ -167,26 +115,28 @@ function log.noColor()
 end
 
 function log.pretty(tbl: any, indent: number?): string
-	local i = indent or 0
-	local spacing = string.rep("  ", i)
 	if type(tbl) ~= "table" then
 		return tostring(tbl)
 	end
-	local result = "{\n"
-	for key, value in pairs(tbl) do
-		local keyStr = type(key) == "string" and key or "[" .. tostring(key) .. "]"
-		result = result .. spacing .. "  " .. keyStr .. ": "
-		if type(value) == "table" then
-			result = result .. log.pretty(value, i + 1)
-		elseif type(value) == "string" then
-			result = result .. '"' .. value .. '"'
-		else
-			result = result .. tostring(value)
-		end
-		result = result .. "\n"
+
+	indent = indent or 0
+	local spacing = string.rep("  ", indent)
+	local result = { "{" }
+
+	for key, value in tbl do
+		local keyStr = if type(key) == "string" then key else `["{key}"]`
+		--stylua: ignore
+		local valueStr = if type(value) == "table" then
+				log.pretty(value, indent + 1)
+			elseif type(value) == "string" then
+				`"{value}"`
+			else
+				value
+
+		table.insert(result, `{keyStr}: {valueStr}`)
 	end
-	result = result .. spacing .. "}"
-	return result
+	table.insert(result, "}")
+	return table.concat(result, `\n{spacing}`)
 end
 
-return log
+return table.freeze(log)

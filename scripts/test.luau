@@ -6,7 +6,7 @@ log.setLevel("debug")
 
 local runProcess = require("../src/util/runProcess")
 
-runProcess({
+runProcess(
 	"build/rocale-cli",
 	"run",
 	"--script",
@@ -21,8 +21,8 @@ runProcess({
 	"HELLO_GLOBAL=hello,WORLD_GLOBAL=world!",
 	"--binaryOutput",
 	"build/testOutput.txt",
-	"--verbose",
-})
+	"--verbose"
+)
 
 local testOutput = fs.readFileToString("build/testOutput.txt")
 fs.remove("build/testOutput.txt")
@@ -30,7 +30,7 @@ assert(testOutput == "hello world!", `Expected binary output to be "hello world!
 
 log.info("Rerunning tests using load.version and without optional variables")
 
-runProcess({
+runProcess(
 	"build/rocale-cli",
 	"run",
 	"--script",
@@ -41,5 +41,5 @@ runProcess({
 	process.env.TEST_UNIVERSE_ID,
 	"--load.version",
 	"0",
-	"--verbose",
-})
+	"--verbose"
+)
